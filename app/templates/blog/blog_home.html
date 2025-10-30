@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %} MY Topic app {% endblock %}
+{% block header %}
+ Blogs List
+   {% if current_user.is_authenticated %}
+   <span class="d-flex justify-content-end" style="margin-top:-30px">
+     <a class="btn btn-outline-danger fs-sm" href="/blogs/create">Create Blog</a>
+   </span>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  
+  {% for blog in blogs %}
+    <div class="d-flex justify-content-between align-items-start flex-column mb-3">
+      <h4>{{ blog['title'] }} <span style="font-size: 0.8rem;">
+          by {{ blog['author']['username'] }},
+          on: {{ blog['created'].strftime('%Y-%m-%d %H:%M') if blog['created'] else ''}} </span>
+      </h4>
+      <div>
+        <p>{{ blog['content'] }}</p>
+        <div class="mb-2"><small>| Comments: {{ blog['comment'] }}</small></div>
+      </div>      
+      {% if current_user.id == blog['author_id'] %}
+        <div>
+          <a class="btn btn-outline-primary fs-sm" href="/blogs/{{ blog['id'] }}/edit">
+            Edit</a>
+          <a class="btn btn-outline-danger fs-sm" href="/blogs/{{ blog['id'] }}/delete">
+            Delete</a>
+        </div>
+      {% endif %}
+    </div>
+    {% if not loop.last %} <hr> {% endif %}
+  {% endfor %}
+{# pagenation: target_app, page, total_pages, per_page, page_length, start_page, end_page #}
+  {% with 
+    target_app='blogs', 
+    age=page, 
+    total_pages=total_pages, 
+    per_page=per_page, 
+    page_length=page_len, 
+    start_page=start_page, 
+    end_page=end_page %}
+      {% include 'auth/pagenation.html' with context %}
+  {% endwith %}
+{% endblock %}

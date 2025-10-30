@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Server{% endblock %}
+
+{% block header %}
+    <h1>Create a New Server</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <form method="POST" action="{{ url_for('server_list.create_server') }}">
+        <div class="form-group">
+            <label for="server_name">Server Name</label>
+            <input type="text" class="form-control" id="server_name" name="server_name" required>
+        </div>
+        <div class="form-group">
+            <label for="server_ip">Server IP</label>
+            <input type="text" class="form-control" id="server_ip" name="server_ip" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" value="root">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+        <div class="form-group">
+            <label for="operators">Operators</label>
+            <select multiple class="form-control" id="operators" name="operators">
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+            <small class="form-text text-muted">Hold down Ctrl to select multiple operators.</small>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Create Server</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Server{% endblock %}
+
+{% block header %}
+    <h1>Edit Server: {{ server.server_name }}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <form method="POST" action="{{ url_for('server_list.edit_server', id=server.id) }}">
+        <div class="form-group">
+            <label for="server_name">Server Name</label>
+            <input type="text" class="form-control" id="server_name" name="server_name" value="{{ server.server_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="server_ip">Server IP</label>
+            <input type="text" class="form-control" id="server_ip" name="server_ip" value="{{ server.server_ip }}" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" value="{{ server.username }}">
+        </div>
+        <div class="form-group">
+            <label for="password">New Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep current password">
+        </div>
+        <div class="form-group">
+            <label for="operators">Operators</label>
+            <select multiple class="form-control" id="operators" name="operators">
+                {% set current_operator_ids = server.operators.with_entities(Users.id).all() | map(attribute=0) | list %}
+                {% for user in users %}
+                    <option value="{{ user.id }}" {% if user.id in current_operator_ids %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                {% endfor %}
+            </select>
+            <small class="form-text text-muted">Hold down Ctrl (or Command on Mac) to select multiple operators.</small>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Update Server</button>
+    </form>
+</div>
+{% endblock %}
