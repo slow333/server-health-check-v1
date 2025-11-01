@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Server{% endblock %}
+
+{% block header %}
+    <h1>Edit Server: {{ server.server_name }}</h1>
+{% endblock %}
+
+{% block content %}
+  {% include 'health/servers/template_server_form.html' %}
+{% endblock %}

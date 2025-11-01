@@ -6,10 +6,11 @@
 {% endblock %}
   
 {% block content %}
-  <form method="post" class="form-group d-flex flex-column gap-2 align-items-center" style="max-width: 600px; margin: auto;">
-    <h4>{{ profile['username'] }} {{ profile['email'] }}을 지울까요</h4>
+  <form method="post" class="form-group d-flex flex-column gap-2 align-items-center" 
+    action="/auth/{{ user['id'] }}/delete" style="max-width: 600px; margin: auto;">
+    <h4>{{ user['username'] }} {{ user['email'] }}을 지울까요</h4>
 
     <input class="btn btn-danger" type="submit" value="Delete User Profile" >
-    <a class="btn btn-secondary w-100" href="/apps/profiles/">cancel</a>
+    <a class="btn btn-secondary w-100" href="/auth/{{ current_user.id }}">cancel</a>
   </form>
 {% endblock %}

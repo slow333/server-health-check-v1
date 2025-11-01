@@ -2,10 +2,8 @@
   <div>
     <button class="navbar-btn" id="home"><a href="/home">Home</a></button>
     <button class="navbar-btn" id="contents"><a href="/contents/">contents</a></button>
-    <button class="navbar-btn" id="health"><a href="/health/server_infos">Server Infos</a></button>
+    <button class="navbar-btn" id="health"><a href="/health/servers/">Access Infos</a></button>
     {% if current_user.is_authenticated %}
-      <button class="navbar-btn" id="blogs"><a href="/blogs/">blogs</a></button>
-      <button class="navbar-btn" id="servers"><a href="/servers/">Servers</a></button>
     {% endif %}
   </div>
   <ul class="user-menu d-flex align-items-center justify-content-end gap-2">

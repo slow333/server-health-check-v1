@@ -1,11 +1,12 @@
 from flask import (Blueprint, request, render_template as render, current_app,
     redirect, flash, url_for )
+from psutil import users
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask_mail import Message 
 from flask_login import login_user, logout_user, login_required, current_user
 from ..extensions import db, mail
-from ..models_users import Users
+from ..models.users_server import Server, Users
 from werkzeug.utils import secure_filename
 from PIL import Image
 import os
@@ -54,6 +55,7 @@ def register_users():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
+        ip_addr = request.form.get('ip_addr')
         # A checkbox will be in the form data if it was checked, otherwise it won't.
         is_admin = 'is_admin' in request.form
 
@@ -71,6 +73,7 @@ def register_users():
         if confirm_password != password:
             flash('암호가 일치하지 않습니다.')
             return render('auth/register.html')
+        
         else:
             user = Users(username=username, email=email, 
                     is_admin=is_admin, profile_image=profile_image_uri)
@@ -78,6 +81,16 @@ def register_users():
             user.check_password(password)
             db.session.add(user)
             db.session.commit()
+
+            if ip_addr:
+                ip_list = [ip.strip() for ip in ip_addr.split(',')]
+                for ip_addr in ip_list:
+                    access_allow = Server.query.filter_by(ip_addr=ip_addr).first()
+                    if access_allow:
+                        user.allow_access.append(access_allow)
+                        db.session.commit()
+            else:
+                pass
             flash('사용자가 추가되었습니다.!')
             return redirect(url_for('auth.login_users'))
 
@@ -131,7 +144,7 @@ def login_users():
         user = Users.query.filter_by(username=username).first()
         if user is None:
             error = '사용자 명을 확인하세요.'
-        elif not check_password_hash(user.password_hash, password):
+        elif not check_password_hash(user.password, password):
             error = '암호를 확인하세요.'
         
         if error is None:
@@ -148,6 +161,42 @@ def logout():
     logout_user()
     return redirect(url_for('auth.index_auth'))
 
+@bp.route("/<int:id>/manage_server", methods=["GET", "POST"])
+@login_required
+def manage_server(id):
+    servers = db.session.query(Server).all()
+    user = db.session.query(Users).filter_by(id=id).first_or_404()
+
+    if request.method == "POST":
+        # user에서 operator IDs를 통해 해당 리스트를 검색
+        server_ids = request.form.getlist("allowed_servers")
+        managed_servers = db.session.query(Server)\
+            .filter(Server.id.in_(server_ids)).all()
+        user.allowed_servers = managed_servers
+
+        db.session.commit()
+        flash(f"User '{user.username}' managed servers updated successfully.")
+        return redirect(url_for("auth.user_profile", id=current_user.id))
+    return render("auth/manage_server.html", user=user, servers=servers)
+
+@bp.route("/<int:id>/delete", methods=["GET", "POST"])
+@login_required
+def delete_server(id):
+    if request.method == "POST":
+        user = db.session.query(Users).filter_by(id=id).first()
+        if user.is_admin:
+            flash("관리자 계정은 삭제할 수 없습니다.")
+            return redirect(url_for("auth.index_auth"))
+        if current_user.id != user.id and not current_user.is_admin:
+            flash("다른 사용자의 계정을 삭제할 권한이 없습니다.")
+            return redirect(url_for("auth.index_auth"))
+        if current_user.id == user.id or current_user.is_admin:
+            db.session.delete(user)
+            db.session.commit()
+        return redirect(url_for("auth.index_auth"))
+    elif request.method == "GET":
+        user = db.session.query(Users).filter_by(id=id).first()
+        return render("auth/user_delete.html", user=user)
 # ============= 암호 변경 기능 =============================
 def get_reset_token(user_id):
     s = Serializer(current_app.config.get('SECRET_KEY'))

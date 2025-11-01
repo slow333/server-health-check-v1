@@ -1,0 +1,18 @@
+<div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-start flex-column ">
+        <h3>{{ server['server_name'] }}:
+        <div>{{ server['id_ip'] }}:<small>{{ server['port'] }}</small> </div>
+        <div class=" fs-sm">
+            operator: {{ server['operators'] }},<br>
+            on: {{ server['created'].strftime('%Y-%m-%d %H:%M') if server['created'] else ''}} <br>
+            <small>server ip: {{ server['ip_addr'] }}</small><br>
+            <small>server password: {{ server['password'] }}</small>        
+        </div>  
+    </div>
+    <div>
+        <a class="btn btn-outline-primary fs-sm" href="/health/servers/{{ server['id'] }}/edit">
+        Edit</a>
+        <a class="btn btn-outline-danger fs-sm" href="/health/servers/{{ server['id'] }}/delete">
+        Delete</a>
+    </div>
+</div>
