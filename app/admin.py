@@ -51,6 +51,7 @@ def init_admin(app, db):
     )
 
     # Add all specified models to the admin interface
-    from .models.users_server import Users, Server
+    from .models.servers import Servers
+    from .models.users import Users
     admin.add_view(UserView(Users, db.session, category='Models'))
-    admin.add_view(ServerInfoView(Server, db.session, category='Models'))
+    admin.add_view(ServerInfoView(Servers, db.session, category='Models'))

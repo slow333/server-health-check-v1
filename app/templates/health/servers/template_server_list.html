@@ -5,9 +5,12 @@
         <div class=" fs-sm">
             operator: {{ server['operators'] }},<br>
             on: {{ server['created'].strftime('%Y-%m-%d %H:%M') if server['created'] else ''}} <br>
-            <small>server ip: {{ server['ip_addr'] }}</small><br>
+            <small>server ip: {{ server['ip_address'] }}</small><br>
             <small>server password: {{ server['password'] }}</small>        
-        </div>  
+        </div>
+        <div class="fs-sm">
+            hostname from hostinfo: {{ server.hostinfo.hostname if server.hostinfo else 'No Hostname' }}
+        </div>
     </div>
     <div>
         <a class="btn btn-outline-primary fs-sm" href="/health/servers/{{ server['id'] }}/edit">

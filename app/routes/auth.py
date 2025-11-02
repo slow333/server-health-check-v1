@@ -1,12 +1,12 @@
 from flask import (Blueprint, request, render_template as render, current_app,
     redirect, flash, url_for )
-from psutil import users
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask_mail import Message 
 from flask_login import login_user, logout_user, login_required, current_user
 from ..extensions import db, mail
-from ..models.users_server import Server, Users
+from ..models.users import Users
+from ..models.servers import Servers
 from werkzeug.utils import secure_filename
 from PIL import Image
 import os
@@ -55,7 +55,7 @@ def register_users():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        ip_addr = request.form.get('ip_addr')
+
         # A checkbox will be in the form data if it was checked, otherwise it won't.
         is_admin = 'is_admin' in request.form
 
@@ -82,15 +82,6 @@ def register_users():
             db.session.add(user)
             db.session.commit()
 
-            if ip_addr:
-                ip_list = [ip.strip() for ip in ip_addr.split(',')]
-                for ip_addr in ip_list:
-                    access_allow = Server.query.filter_by(ip_addr=ip_addr).first()
-                    if access_allow:
-                        user.allow_access.append(access_allow)
-                        db.session.commit()
-            else:
-                pass
             flash('사용자가 추가되었습니다.!')
             return redirect(url_for('auth.login_users'))
 
@@ -164,14 +155,14 @@ def logout():
 @bp.route("/<int:id>/manage_server", methods=["GET", "POST"])
 @login_required
 def manage_server(id):
-    servers = db.session.query(Server).all()
+    servers = db.session.query(Servers).all()
     user = db.session.query(Users).filter_by(id=id).first_or_404()
 
     if request.method == "POST":
         # user에서 operator IDs를 통해 해당 리스트를 검색
         server_ids = request.form.getlist("allowed_servers")
-        managed_servers = db.session.query(Server)\
-            .filter(Server.id.in_(server_ids)).all()
+        managed_servers = db.session.query(Servers)\
+            .filter(Servers.id.in_(server_ids)).all()
         user.allowed_servers = managed_servers
 
         db.session.commit()

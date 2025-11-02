@@ -1,7 +1,8 @@
-from . import contents_routes, auth, health_server
+from . import contents_routes, auth, health_server, health_host
 
 def init_app(app):
   app.register_blueprint(auth.bp)
   app.register_blueprint(health_server.bp)
+  app.register_blueprint(health_host.bp)
 
   app.register_blueprint(contents_routes.bp)

@@ -19,7 +19,7 @@ def create_app(config_class=Config):
 
     # 블루프린트나 다른 라우트를 여기서 등록
     with app.app_context():
-        from .models.users_server import Users
+        from .models.users import Users
         @login_manager.user_loader
         def load_user(user_id):
             return Users.query.get(int(user_id))

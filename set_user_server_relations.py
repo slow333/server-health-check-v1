@@ -6,7 +6,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from app import create_app
 from app.extensions import db
-from app.models.users_server import Users, Server
+from app.models.servers import Servers
+from app.models.users import Users
 
 def seed_data():
     """Seeds the database with initial data."""
@@ -19,10 +20,10 @@ def seed_data():
         test = db.session.query(Users).filter_by(username='test').first()
         kalpa = db.session.query(Users).filter_by(username='kalpa').first()
 
-        s1 = db.session.query(Server).filter_by(server_name='R6').first()
-        s2 = db.session.query(Server).filter_by(server_name='R7').first()
-        s3 = db.session.query(Server).filter_by(server_name='R8').first()
-        s4 = db.session.query(Server).filter_by(server_name='R9').first()
+        s1 = db.session.query(Servers).filter_by(server_name='R6').first()
+        s2 = db.session.query(Servers).filter_by(server_name='R7').first()
+        s3 = db.session.query(Servers).filter_by(server_name='R8').first()
+        s4 = db.session.query(Servers).filter_by(server_name='R9').first()
 
         admin.allowed_servers.extend([s1, s2, s3, s4])
         kalpa.allowed_servers.extend([s1, s2, s3, s4])
