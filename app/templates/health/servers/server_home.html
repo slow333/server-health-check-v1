@@ -10,20 +10,48 @@
 {% endblock %}
 
 {% block content %}
-  {% if current_user.is_admin %}
-    {% for server in servers %}
-      {% include 'health/servers/template_server_list.html' %}
-      {% if not loop.last %} <hr> {% endif %}
-    {% endfor %}
-  {% else %}
-    {% for server in server_list_by_user %}
-      {% include 'health/servers/template_server_list.html' %}
-      {% if not loop.last %} <hr> {% endif %}
-    {% endfor %}
-  {% endif %}
+<style>
+  td {
+    text-align: center;
+  }
+</style>
+  <div class="mt-2">
+    <a class="btn btn-outline-primary fs-sm" href="/health/hostinfos/generate">
+      Generate HostInfos from Servers</a>
+  </div>
+  <table class="table table-striped mt-3 w-100 fs-sm">
+      <thead class="thead-dark">
+          <tr>
+              <th>server name</th>
+              <th>ID & IP</th>
+              <th>Port</th>
+              <th>PW</th>
+              <th>Operators</th>
+              <th>Created</th>
+              <th>Hostname from hostinfos</th>
+              <th>Edit</th>
+              <th>Delete</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% if current_user.is_admin %}
+          {% for server in servers %}
+            <tr>
+              {% include 'health/servers/template_server_list.html' %}
+            </tr>
+          {% endfor %}
+        {% else %}
+          {% for server in server_list_by_user %}
+            <tr>
+              {% include 'health/servers/template_server_list.html' %}
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
 {# pagenation: target_app, page, total_pages, per_page, page_length, start_page, end_page #}
   {% with 
-    target_app='servers', 
+    target_app='health/servers', 
     page=page, 
     total_pages=total_pages, 
     per_page=per_page, 

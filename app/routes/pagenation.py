@@ -1,20 +1,18 @@
 from flask import request
 from ..extensions import db
 
-def pagenation(obj):
+def pagenation(query, per_page=5, orders=None):
     page = request.args.get("page", 1, type=int)
-    per_page = 5
     offset = (page - 1) * per_page
 
-    query_result = (
-       db.session.query(obj)
-         .order_by(obj.id.desc())
-         .limit(per_page)
-         .offset(offset)
-         .all()
-    )
+    if orders is not None:
+        query = query.order_by(orders)
+    else:
+        # 모델에 'id' 속성이 있다고 가정하고 기본 정렬 적용
+        query = query.order_by(query.column_descriptions[0]['entity'].id.desc())
 
-    total = db.session.query(obj).count()
+    query_result = query.limit(per_page).offset(offset).all()
+    total = query.order_by(None).count()
 
     # 페이지네이션: 현재 페이지 기준으로 최대 5개 페이지만 표시
     total_pages = (total // per_page) + (1 if total % per_page else 0)

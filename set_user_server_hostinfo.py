@@ -8,7 +8,7 @@ from app import create_app
 from app.extensions import db
 from app.models.servers import Servers
 from app.models.users import Users
-from app.models.get_host import HostInfos
+from app.models.hostinfos import HostInfos
 
 def seed_data():
     """Seeds the database with initial data."""

@@ -335,6 +335,7 @@ textarea {
 
 label {
   font-size: var(--text-md);
+  margin: 8px;
 }
 
 .link-list a:hover , a.action:hover {
@@ -382,28 +383,12 @@ label {
   gap: 10px;
   align-items: center;
 }
-table {
-  border-collapse: collapse;
-  border: 1px solid #575656;
-  margin: 20px 0;
-  padding: 10px;
-}
 
-th, td {
-  border: 1px solid #aaa;
-  padding: 4px 6px;
-  text-align: left;
-}
-
-td div span:first-child {
-  display: inline-block;
-  width:60px; 
-  height:30px;
-  padding-right: 6px;
-}
-tr th {
+.table thead {
   text-align:center;
-  background-color:var(--c-dark-gray);
+}
+.table thead tr th {
+  background-color: black;
   color:  #f0f0f0;
 }
 /* ================ Dark Mode Styles ================== */

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %} Server Health Check {% endblock %}
+{% block header %} Commands List {% endblock %}
+
+{% block content %}
+<style>
+  td {  text-align: center;  }
+</style>
+  <div class="mt-2">
+    <a class="btn btn-outline-primary fs-sm" href="/health/commands/create">Create Command</a>
+    <form  method="get" action="/health/commands/" accept-charset="utf-8" class="d-inline-block float-end">
+      <select name="category" id="">
+        <option value="">Select Category</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>
+            {{ cat.split('.')[-1] }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="search_name" placeholder="Search Name" value="{{ search_name }}" class="form-control d-inline-block" style="width: 200px;">
+      <input type="text" name="search_category" placeholder="Search Category" value="{{ search_category }}" class="form-control d-inline-block" style="width: 200px;">
+      <button type="submit" class="btn btn-outline-secondary">Search</button>
+    </form>
+  </div>
+  <table class="table table-striped mt-3">
+      <thead class="thead-dark">
+          <tr>
+              <th scope="col">category</th>
+              <th scope="col">name</th>
+              <th scope="col">command</th>
+              <th scope="col">edit</th>
+              <th scope="col">delete</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for cmd in cmd_list %}
+          <tr>
+            <td>{% set category = cmd.category.split('.') %} {{ category[-1] }}</td>
+            <td>{{ cmd.name }}</td>
+            <td class="text-start">{{ cmd.cmd }}</td>
+            <td><a href="{{ url_for('commands.edit_cmd', id=cmd.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a></td>
+            <td><a href="{{ url_for('commands.delete_cmd', id=cmd.id) }}" class="btn btn-outline-danger btn-sm">Delete</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+{# pagenation: target_app, page, total_pages, per_page, page_length, start_page, end_page #}
+  {% with 
+    target_app='health/commands', 
+    page=pagination.page, 
+    total_pages=pagination.total_pages, 
+    per_page=pagination.per_page, 
+    page_length=pagination.page_len, 
+    start_page=pagination.start_page, 
+    end_page=pagination.end_page %}
+      {% include 'auth/pagenation.html' with context %}
+  {% endwith %}
+{% endblock %}

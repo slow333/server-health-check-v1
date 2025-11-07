@@ -1,17 +1,28 @@
 from flask import (
   Blueprint, request, redirect, 
   render_template as render, flash, url_for) # type: ignore
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required # type: ignore
 from ..extensions import db
 from ..models.servers import Servers
 from ..models.users import Users
 from .pagenation import pagenation
+from sqlalchemy import or_ # type: ignore
 
 bp = Blueprint("servers_infos", __name__, url_prefix="/health/servers")
 
 @bp.route("/")
 def index():
-    pagination_data = pagenation(Servers)
+    search_query = request.args.get('q', '')
+
+    query = db.session.query(Servers)
+
+    if search_query:
+        query = query.filter(or_(
+            Servers.ip_address.ilike(f'%{search_query}%'),
+            Servers.server_name.ilike(f'%{search_query}%')
+        ))
+
+    pagination_data = pagenation(query, per_page=10, orders=Servers.id.desc())
     current_user_id = current_user.get_id()
     server_list_by_user = db.session.query(Servers)\
         .join(Servers.operators)\
@@ -30,7 +41,6 @@ def index():
 @bp.route("/create", methods=["GET", "POST"])
 @login_required
 def create_server():
-    users = db.session.query(Users).all()
     if request.method == "POST":
         server_name = request.form.get("server_name")
         login_id = request.form.get("login_id")
@@ -43,7 +53,7 @@ def create_server():
 
         if not ip_address or not login_id or not server_name:
             flash("IP 주소, 로그인 ID, 서버 이름은 필수입니다.")
-            return render(url_for("servers_infos.edit_server"))
+            return render(url_for("servers_infos.create_server"))
         query_existing = db.session.query(Servers).filter_by(ip_address=ip_address).first()
         if query_existing:
             flash("이미 존재하는 서버입니다.")
@@ -61,7 +71,9 @@ def create_server():
         db.session.commit()
         flash(f"Server '{new_server.server_name}' created successfully.")
         return redirect(url_for("servers_infos.index"))
-    return render("health/servers/create_server.html", users=users)
+    else:
+        users = db.session.query(Users).all()
+        return render("health/servers/create_server.html", users=users)
 
 @bp.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
@@ -92,8 +104,7 @@ def edit_server(id):
         server.login_id = login_id
         server.ip_address = ip_address
         server.port = port
-        if password:
-            server.set_password(password)
+        server.password = password
 
         # user에서 operator IDs를 통해 해당 리스트를 검색
         operator_ids = request.form.getlist("operators")
@@ -113,7 +124,6 @@ def delete_server(id):
         db.session.delete(server)
         db.session.commit()
         return redirect(url_for("servers_infos.index"))
-    elif request.method == "GET":
+    else:
         server = db.session.query(Servers).filter_by(id=id).first()
         return render("health/servers/delete_server.html", server=server)
-    return None
