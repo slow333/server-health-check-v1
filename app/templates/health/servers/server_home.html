@@ -10,14 +10,26 @@
 {% endblock %}
 
 {% block content %}
-<style>
-  td {
-    text-align: center;
-  }
-</style>
-  <div class="mt-2">
+<div class="mt-3 d-flex justify-content-between align-items-center">
+  <div>
     <a class="btn btn-outline-primary fs-sm" href="/health/hostinfos/generate">
-      Generate HostInfos from Servers</a>
+      Generate HostInfos</a>
+  </div>
+  <form method="get" action="/health/servers/" accept-charset="utf-8" 
+        class="d-flex justify-content-between align-items-center gap-1 fs-sm">
+    <select name="user" id="" class="form-select d-inline-block w-auto  fs-sm">
+      <option value="">Select User</option>
+      {% for user in users %}
+        <option value="{{ user.username }}" >{{ user.username }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="server_name" placeholder="Server Name" 
+      value="{{ server_name }}" class="form-control d-inline-block fs-sm" style="width: 160px;">
+    <input type="text" name="ip_address" placeholder="IP Address" 
+      value="{{ ip_address }}" class="form-control d-inline-block fs-sm" style="width: 160px;">
+    <button type="submit" class="btn btn-outline-secondary fs-sm">Search</button>
+    <a class="btn btn-secondary fs-sm" href="/health/servers/">Reset</a>
+  </form>
   </div>
   <table class="table table-striped mt-3 w-100 fs-sm">
       <thead class="thead-dark">
@@ -52,12 +64,12 @@
 {# pagenation: target_app, page, total_pages, per_page, page_length, start_page, end_page #}
   {% with 
     target_app='health/servers', 
-    page=page, 
-    total_pages=total_pages, 
-    per_page=per_page, 
-    page_length=page_len, 
-    start_page=start_page, 
-    end_page=end_page %}
+    page=pagenation.page, 
+    total_pages=pagenation.total_pages, 
+    per_page=pagenation.per_page, 
+    page_length=pagenation.page_len, 
+    start_page=pagenation.start_page, 
+    end_page=pagenation.end_page %}
       {% include 'auth/pagenation.html' with context %}
   {% endwith %}
 {% endblock %}

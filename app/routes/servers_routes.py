@@ -6,37 +6,64 @@ from ..extensions import db
 from ..models.servers import Servers
 from ..models.users import Users
 from .pagenation import pagenation
-from sqlalchemy import or_ # type: ignore
+from sqlalchemy import or_, and_, cast, String # type: ignore
 
 bp = Blueprint("servers_infos", __name__, url_prefix="/health/servers")
 
 @bp.route("/")
 def index():
-    search_query = request.args.get('q', '')
+    search_name = request.args.get('server_name', '')
+    search_ip = request.args.get('ip_address', '')
+    search_user = request.args.get('user', '')
 
     query = db.session.query(Servers)
+    # ========== Search Logic ==========
+    # user을 선택한 상태에서 search_name이나 ip_address를 검색하면 and 조건으로 검색
+    # user만 선택한 상태에서는 user으로만 검색
+    # server_name이나 ip_address만 검색한 상태에서는 or 조건으로 검색
+    # INET 형태의 ip_address cast를 통해 String으로 변환 후에 검색
+    if search_user and not (search_name or search_ip):
+        query = query.join(Servers.operators).filter(Users.username == search_user)
+    elif  search_user and (search_name or search_ip):
+        filter = []
+        if search_name:
+            filter.append(Servers.server_name.ilike(f'%{search_name}%'))
+        if search_ip:
+            filter.append(cast(Servers.ip_address, String).ilike(f'%{search_ip}%'))
+        query = query.join(Servers.operators)\
+            .filter(Users.username == search_user)\
+                .filter(or_(*filter))
 
-    if search_query:
-        query = query.filter(or_(
-            Servers.ip_address.ilike(f'%{search_query}%'),
-            Servers.server_name.ilike(f'%{search_query}%')
-        ))
+    if search_name or search_ip:
+        filter = []
+        if search_name:
+            filter.append(Servers.server_name.ilike(f'%{search_name}%'))
+        if search_ip:
+            filter.append(cast(Servers.ip_address, String).ilike(f'%{search_ip}%'))
+        query = query.filter(or_(*filter))
+    # ========== end Search Logic ==========    
 
     pagination_data = pagenation(query, per_page=10, orders=Servers.id.desc())
     current_user_id = current_user.get_id()
     server_list_by_user = db.session.query(Servers)\
         .join(Servers.operators)\
         .filter(Users.id == current_user_id).all()
+    users = db.session.query(Users).all()
 
     return render("health/servers/server_home.html", 
         server_list_by_user=server_list_by_user,          
         servers=pagination_data['query_result'], 
-        page=pagination_data['page'], 
-        per_page=pagination_data['per_page'], 
-        start_page=pagination_data['start_page'], 
-        end_page=pagination_data['end_page'], 
-        total_pages=pagination_data['total_pages'], 
-		page_len=pagination_data['page_len'])
+        users=users,
+        pagenation = pagination_data,
+        # search_name=search_name,
+        # search_ip=search_ip,
+        # pagpagination_data['page'], 
+        # per_page=pagination_data['per_page'], 
+        # start_page=pagination_data['start_page'], 
+        # end_page=pagination_data['end_page'], 
+        # total_pages=pagination_data['total_pages'], 
+		# page_len=pagination_data['page_len']
+        )
 
 @bp.route("/create", methods=["GET", "POST"])
 @login_required
