@@ -1,7 +1,7 @@
 from flask import (Blueprint, request, render_template as render, 
     redirect, flash, url_for )
 from flask_login import login_required # type: ignore
-from sqlalchemy import or_ # type: ignore
+from sqlalchemy import or_, and_ # type: ignore
 from ..extensions import db
 from ..models.commands import Commands, CAT
 from .pagenation import pagenation
@@ -16,16 +16,31 @@ def index_cmds():
 
     query = db.session.query(Commands)
 
-    filters = []
-    if search_name:
-        filters.append(Commands.name.ilike(f'%{search_name}%'))
-    if search_cmd:
-        filters.append(Commands.cmd.ilike(f'%{search_cmd}%'))
-    if selected_category:
+    # ========== Search Logic ==========
+    # cat을 선택한 상태에서 name이나 cmd를 검색하면 and 조건으로 검색
+    # cat만 선택한 상태에서는 cat으로만 검색
+    # name이나 cmd만 검색한 상태에서는 or 조건으로 검색
+    filters_or = []
+    if selected_category and (search_name or search_cmd):
+        filters = []
         filters.append(Commands.category == selected_category)
-    
-    if filters:
-        query = query.filter(or_(*filters))
+        # if로 분기하는 이유는 and_()에 빈 리스트를 넘기면 에러가 나기 때문
+        # if로 안하면 ""이 입력되어 전체 검색을 수행해서 검색이 안됨
+        if search_name:
+            filters.append(Commands.name.ilike(f'%{search_name}%'))
+        if search_cmd:
+            filters.append(Commands.cmd.ilike(f'%{search_cmd}%'))
+        query = query.filter(and_(*filters))
+    elif selected_category and not (search_name and search_cmd):
+        filters_or.append(Commands.category == selected_category)
+    elif not selected_category and search_name:
+        filters_or.append(Commands.name.ilike(f'%{search_name}%'))
+    elif not selected_category and search_cmd:
+        filters_or.append(Commands.cmd.ilike(f'%{search_cmd}%'))
+
+    if filters_or:
+        query = query.filter(or_(*filters_or))
+    # ========== end Search Logic ==========
 
     pg_data = pagenation(query=query, per_page=10, orders=Commands.category.asc())
 
@@ -35,8 +50,9 @@ def index_cmds():
         categories=categories,
         cmd_list=pg_data['query_result'], 
         pagination=pg_data,
-        search_name=search_name,
-        search_cmd=search_cmd)
+        selected_category=selected_category, # 실제 역활이 없음
+        search_name=search_name, # 실제 역활이 없음
+        search_cmd=search_cmd) # 실제 역활이 없음
 
 @bp.route('/create', methods=['GET','POST'])
 def create_cmd():
