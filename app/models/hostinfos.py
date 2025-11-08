@@ -2,6 +2,7 @@ from ..extensions import db
 from sqlalchemy.dialects.postgresql import INET # type: ignore
 from .users import BaseModel
 from .svinfos import SvInfos
+from .sar_traffic import SarTraffic
 
 # server와 one to one Relationship
 class HostInfos(BaseModel):
@@ -15,6 +16,7 @@ class HostInfos(BaseModel):
 
     # SvInfos와 one to many Relationship
     sv_infos = db.relationship('SvInfos', backref='host_infos', lazy=True)
+    sar_traffic = db.relationship('SarTraffic', backref='host_infos', lazy=True)
 
     def __repr__(self):
         return f'<HostInfos {self.hostname} for {self.ip_address}>'

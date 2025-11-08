@@ -1,6 +1,5 @@
 from ..extensions import db
 from sqlalchemy.dialects.postgresql import INET # type: ignore
-from werkzeug.security import generate_password_hash
 from .users import BaseModel
 
 class SvInfos(BaseModel):

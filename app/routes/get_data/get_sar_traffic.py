@@ -40,8 +40,9 @@ def get_sar_traffic():
                 stdout.channel.recv_exit_status()
 
             # 결과 파일 다운로드
-            local_output_path = "./app/routes/traffic_data/"
-            local_output_file = f"{local_output_path}{filename}"
+            local_output_path = os.path.join(current_dir, '..', 'traffic_data')
+            local_output_file = os.path.join(local_output_path, filename)
+            # local_output_file = f"{local_output_path}/{filename}"
             sftp = ssh.open_sftp()
             sftp.get(remote_output_file, local_output_file)
             sftp.close()

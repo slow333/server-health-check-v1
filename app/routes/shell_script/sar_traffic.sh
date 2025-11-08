@@ -19,14 +19,8 @@ for i in {0..29}; do
   if [ -f "$file" ]; then
     # sar 명령어로 네트워크 트래픽 수집
     LC_ALL=C sar -n DEV -f "$file" | grep -vE "IFACE|lo" \
-    | awk -v d=$(date -d "-$i day" +%Y-%m-%d) -v ip=$IP_ADDRESS -v h=$(hostname)\
-    '{printf "%s,%s,%s,%s %s,%.2f,%.2f,%.2f,%.2f\n", h,ip, $2, d, $1, $3, $4, $5, $6}'\
+    | awk  -v d=$(date -d "-$i day" +%Y-%m-%d) -v ip=$IP_ADDRESS -v h=$(hostname)\
+    'NR > 2 {printf "%s,%s,%s,%s %s,%.2f,%.2f,%.2f,%.2f\n", h,ip, $2, d, $1, $3, $4, $5, $6}'\
      >> $output_file
   fi
 done
- 
-# LC_ALL=C sar -n DEV -f /var/log/sa/sa07 | grep -vE "lo" | awk -v d=$(date -d "-0 day" +%Y-%m-%d) '{ printf "%s,%s,%s,%.2f,%.2f,%.2f,%.2f\n", d, $1, $2, $3, $4, $5, $6}'
-# LC_ALL=C sar -n DEV -f /var/log/sa/sa07 | grep -vE "lo" | awk -v d=$(date -d "-0 day" +%Y-%m-%d) -v h=$(hostname -I) '{printf "%s,%s,%s %s,%.2f,%.2f,%.2f,%.2f\n", h, $2, d, $1, $3, $4, $5, $6}'
-# LC_ALL=C sar -n DEV -f "$file" | grep -vE "IFACE|lo" | awk -v d=$(date -d "-$i day" +%Y-%m-%d) '{
-    #   printf "%s,%s,%s,%.2f,%.2f,%.2f,%.2f\n", d:$1, $2, $3, $4, $5, $6
-    # }' >> $output_file
