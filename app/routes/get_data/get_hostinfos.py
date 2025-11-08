@@ -1,5 +1,5 @@
-from ..extensions import db
-from ..models.servers import Servers
+from ...extensions import db
+from ...models.servers import Servers
 
 servers = db.session.query(Servers).all()
 

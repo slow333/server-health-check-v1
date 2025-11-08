@@ -1,6 +1,7 @@
 from ..extensions import db
 from sqlalchemy.dialects.postgresql import INET # type: ignore
 from .users import BaseModel
+from .svinfos import SvInfos
 
 # server와 one to one Relationship
 class HostInfos(BaseModel):
@@ -12,10 +13,8 @@ class HostInfos(BaseModel):
     # Servers와 one to one Relationship
     server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
 
-    # SvInfo와 one to many Relationship
-    # sv_infos = db.relationship('SvInfo', backref='hostname', lazy=True)
-    # SVSysctl와 one to many Relationship
-    # sv_sysctls = db.relationship('SVSysctl', backref='server_info', lazy=True)
+    # SvInfos와 one to many Relationship
+    sv_infos = db.relationship('SvInfos', backref='host_infos', lazy=True)
 
     def __repr__(self):
         return f'<HostInfos {self.hostname} for {self.ip_address}>'

@@ -38,6 +38,9 @@ def seed_data():
             Commands(category='sv_sysctl', name='vm.overcommit_memory', cmd='sysctl vm.overcommit_memory;'),
             Commands(category='sv_sysctl', name='vm.overcommit_ratio', cmd='sysctl vm.overcommit_ratio;'),
         ]
+        commands_sysstat = [
+            Commands(category='sv_sysstat', name='network_traffic', cmd='sar -n DEV;'),
+        ]
 
         db.session.add_all(commands)
         db.session.commit()
@@ -45,3 +48,33 @@ def seed_data():
 
 if __name__ == '__main__':
     seed_data()
+
+'''
+현재 활성화된 서비스 목록을 보여줍니다.
+systemctl list-units --type=service
+bash file
+최근 한달간의 트래픽을 수집
+#!/bin/bash
+
+# 출력 파일 초기화
+output_file="monthly_traffic_summary.csv"
+# 헤더 추가
+echo "Date,Time,Interface,rxpck/s,txpck/s,rxkB/s,txkB/s" > $output_file
+
+# 오늘 날짜 기준 최근 30일
+for i in {0..29}; do
+  # 날짜 계산-오늘 날짜를 맨 마지막으로 보냄(8일이면, 31로 함)
+  day=$(date -d "-$i day" +%d)
+  file="/var/log/sa/sa$day"
+
+  # 파일 존재 여부 확인
+  if [ -f "$file" ]; then
+    # sar 명령어로 네트워크 트래픽 수집
+    LC_ALL=C sar -n DEV -f "$file" | grep -vE "IFACE|lo" | awk -v d=$(date -d "-$i day" +%Y-%m-%d) '{
+      printf "%s,%s,%s,%.2f,%.2f,%.2f,%.2f\n", d, $1, $2, $3, $4, $5, $6
+    }' >> $output_file
+  fi
+done
+$2         $3,     $4,         $5,       $6
+IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s 
+'''
