@@ -1,13 +1,13 @@
 
 def get_sar_traffic():
-    import paramiko
+    import paramiko # type: ignore
     import os
     from ...extensions import db
     from ...models.servers import Servers
 
     # 현재 파일의 위치를 기준으로 셸 스크립트의 절대 경로를 생성합니다.
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    local_script = os.path.join(current_dir, '..', 'shell_script', 'sar_traffic.sh')
+    local_script = os.path.join(current_dir, '..','..', 'shell_script', 'sar_traffic.sh')
     remote_script = '/tmp/sar_traffic.sh'
     servers = db.session.query(Servers).all()
     for server in servers:
@@ -26,7 +26,7 @@ def get_sar_traffic():
             # 원격 서버의 IP 주소를 가져와서 파일 이름을 구성합니다.
             _, stdout, stderr = ssh.exec_command("hostname -I | awk '{print $1}'")
             ip_address = stdout.read().decode('utf-8').strip()
-            filename = f"monthly_traffic_summary_{ip_address}.csv"
+            filename = f"month_traffic_{ip_address}.csv"
             remote_output_file = f"/tmp/{filename}"
 
             # 셸 스크립트에 실행 권한을 부여하고 실행합니다.
@@ -40,7 +40,7 @@ def get_sar_traffic():
                 stdout.channel.recv_exit_status()
 
             # 결과 파일 다운로드
-            local_output_path = os.path.join(current_dir, '..', 'traffic_data')
+            local_output_path = os.path.join(current_dir, '..','..', 'data')
             local_output_file = os.path.join(local_output_path, filename)
             # local_output_file = f"{local_output_path}/{filename}"
             sftp = ssh.open_sftp()

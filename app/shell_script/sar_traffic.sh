@@ -5,9 +5,9 @@
 IP_ADDRESS=$(hostname -I | awk '{print $1}')
 HOSTNAME=$(hostname)
 
-output_file="/tmp/monthly_traffic_summary_$IP_ADDRESS.csv"
+output_file="/tmp/month_traffic_$IP_ADDRESS.csv"
 # 헤더 추가
-echo "hostname,IP,Interface,Date Time,rxpck/s,txpck/s,rxkB/s,txkB/s" > $output_file
+echo "hostname,IP,Interface,Date Time,rxkB/s,txkB/s" > $output_file
 
 # 오늘 날짜 기준 최근 30일
 for i in {0..29}; do
@@ -20,7 +20,7 @@ for i in {0..29}; do
     # sar 명령어로 네트워크 트래픽 수집
     LC_ALL=C sar -n DEV -f "$file" | grep -vE "IFACE|lo" \
     | awk  -v d=$(date -d "-$i day" +%Y-%m-%d) -v ip=$IP_ADDRESS -v h=$(hostname)\
-    'NR > 2 {printf "%s,%s,%s,%s %s,%.2f,%.2f,%.2f,%.2f\n", h,ip, $2, d, $1, $3, $4, $5, $6}'\
+    'NR > 2 {printf "%s,%s,%s,%s %s,%.2f,%.2f\n", h,ip, $2, d, $1, $5, $6}'\
      >> $output_file
   fi
 done

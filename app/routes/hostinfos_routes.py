@@ -20,7 +20,7 @@ def index():
         .join(Servers.operators)\
         .filter(Users.id == current_user_id).all()
 
-    return render("health/hostinfos/hostinfos_home.html", 
+    return render("health/hostinfos/index.html", 
         hostinfo_server_by_user=hostinfo_server_by_user, 
         hostinfos=hostinfos)
 

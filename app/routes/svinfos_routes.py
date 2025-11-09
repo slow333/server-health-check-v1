@@ -8,7 +8,6 @@ from ..models.servers import Servers
 from ..models.hostinfos import HostInfos
 from ..models.svinfos import SvInfos
 from .get_data.get_svinfos import get_svinfos
-from sqlalchemy import or_, and_ # type: ignore
 
 bp = Blueprint("svinfos", __name__, url_prefix="/health/svinfos")
 
@@ -25,7 +24,7 @@ def index():
     
     svinfos = db.session.query(SvInfos).all()
 
-    return render("health/svinfos/svinfos_home.html", 
+    return render("health/svinfos/index.html", 
         svinfo_server_by_user=svinfo_server_by_user, 
         svinfos=svinfos)
 

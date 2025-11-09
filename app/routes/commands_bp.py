@@ -46,10 +46,10 @@ def index_cmds():
 
     categories = [cat.value for cat in CAT]
 
-    return render('health/commands/cmd_home.html', 
+    return render('health/commands/index.html', 
         categories=categories,
         cmd_list=pg_data['query_result'], 
-        pagination=pg_data,
+        pagenation=pg_data,
         selected_category=selected_category, # 실제 역활이 없음
         search_name=search_name, # 실제 역활이 없음
         search_cmd=search_cmd) # 실제 역활이 없음

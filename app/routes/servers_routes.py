@@ -50,19 +50,11 @@ def index():
         .filter(Users.id == current_user_id).all()
     users = db.session.query(Users).all()
 
-    return render("health/servers/server_home.html", 
+    return render("health/servers/index.html", 
         server_list_by_user=server_list_by_user,          
         servers=pagination_data['query_result'], 
         users=users,
         pagenation = pagination_data,
-        # search_name=search_name,
-        # search_ip=search_ip,
-        # pagpagination_data['page'], 
-        # per_page=pagination_data['per_page'], 
-        # start_page=pagination_data['start_page'], 
-        # end_page=pagination_data['end_page'], 
-        # total_pages=pagination_data['total_pages'], 
-		# page_len=pagination_data['page_len']
         )
 
 @bp.route("/create", methods=["GET", "POST"])

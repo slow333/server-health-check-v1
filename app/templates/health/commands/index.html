@@ -48,12 +48,12 @@
 {# pagenation: target_app, page, total_pages, per_page, page_length, start_page, end_page #}
   {% with 
     target_app='health/commands', 
-    page=pagination.page, 
-    total_pages=pagination.total_pages, 
-    per_page=pagination.per_page, 
-    page_length=pagination.page_len, 
-    start_page=pagination.start_page, 
-    end_page=pagination.end_page %}
-      {% include 'auth/pagenation.html' with context %}
+    page=pagenation.page, 
+    total_pages=pagenation.total_pages, 
+    per_page=pagenation.per_page, 
+    page_length=pagenation.page_len, 
+    start_page=pagenation.start_page, 
+    end_page=pagenation.end_page %}
+      {% include 'pagenation.html' with context %}
   {% endwith %}
 {% endblock %}
